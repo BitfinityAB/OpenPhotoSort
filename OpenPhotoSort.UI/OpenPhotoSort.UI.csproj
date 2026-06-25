@@ -12,6 +12,7 @@
 		<Nullable>enable</Nullable>
 
 		<ApplicationTitle>OpenPhotoSort</ApplicationTitle>
+		<ApplicationIcon Condition="$(TargetFramework.Contains('-windows'))">Resources\AppIcon\openphotosort.ico</ApplicationIcon>
 		<ApplicationId>com.companyname.openphotosort</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
