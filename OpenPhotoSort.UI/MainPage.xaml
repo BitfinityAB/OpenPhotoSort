@@ -94,7 +94,7 @@
                 <!-- Progress (visible during sort) -->
                 <ProgressBar Progress="{Binding OperationProgress}"
                              IsVisible="{Binding IsSorting}" Margin="0,12,0,4"/>
-                <Label Text="{Binding StatusText}" IsVisible="{Binding IsBusy}"
+                <Label Text="{Binding StatusText}" IsVisible="{Binding IsStatusVisible}"
                        FontSize="12" TextColor="Gray" Margin="0,0,0,4"/>
 
                 <!-- Step 4 -->

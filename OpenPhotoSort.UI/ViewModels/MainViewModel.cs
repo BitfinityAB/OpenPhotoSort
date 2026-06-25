@@ -93,13 +93,16 @@ public partial class MainViewModel : ObservableObject
     private bool _isSorting;
 
     [ObservableProperty] private double _operationProgress;
-    [ObservableProperty] private string _statusText = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStatusVisible))]
+    private string _statusText = string.Empty;
     [ObservableProperty] private bool _showSummaryButton;
 
     // --- Computed properties ---
 
     public bool IsBusy => IsScanning || IsSorting;
     public bool CanOperate => IsScanComplete && !IsBusy;
+    public bool IsStatusVisible => !string.IsNullOrEmpty(StatusText);
     public bool DuplicatesFolderEnabled =>
         SelectedConflictBehaviorIndex == (int)ConflictBehavior.DuplicatesFolder;
     public bool NoExifFolderEnabled => DumpNoExifToFolder;
@@ -238,6 +241,7 @@ public partial class MainViewModel : ObservableObject
         if (_lastScan is null) return;
 
         _cts = new CancellationTokenSource();
+        _lastSummary = null;
         IsSorting = true;
         OperationProgress = 0;
         ShowSummaryButton = false;
@@ -274,10 +278,11 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsSorting = false;
-            ShowSummaryButton = true;
             _cts.Dispose();
             _cts = null;
         }
+
+        ShowSummaryButton = _lastSummary is not null;
 
         if (cancelled)
             StatusText = "Cancelled.";

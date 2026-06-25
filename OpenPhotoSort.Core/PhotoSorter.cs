@@ -121,77 +121,80 @@ public static class PhotoSorter
         int total = workList.Count;
         int processed = 0, moved = 0, copied = 0, skipped = 0, renamed = 0, failed = 0;
 
-        foreach (var entry in workList)
+        await Task.Run(() =>
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            string fileName = Path.GetFileName(entry.FilePath);
-            bool skipFile = false;
-            bool wasRenamed = false;
-
-            try
+            foreach (var entry in workList)
             {
-                string destPath;
-                if (entry.IsDump)
-                {
-                    Directory.CreateDirectory(options.NoExifFolderPath);
-                    destPath = Path.Combine(options.NoExifFolderPath, fileName);
-                }
-                else
-                {
-                    string sub = BuildSubfolderPath(options.FolderPattern, entry.Date, entry.CameraModel);
-                    string destDir = Path.Combine(options.DestinationFolder, sub);
-                    Directory.CreateDirectory(destDir);
-                    destPath = Path.Combine(destDir, fileName);
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+                string fileName = Path.GetFileName(entry.FilePath);
+                bool skipFile = false;
+                bool wasRenamed = false;
 
-                if (File.Exists(destPath))
+                try
                 {
-                    switch (options.ConflictBehavior)
+                    string destPath;
+                    if (entry.IsDump)
                     {
-                        case ConflictBehavior.DoNotCopyOrMove:
-                            skipFile = true;
-                            skipped++;
-                            break;
-                        case ConflictBehavior.RenameCopy:
-                            destPath = FindRenameDestination(destPath);
-                            wasRenamed = true;
-                            break;
-                        case ConflictBehavior.Overwrite:
-                            break;
-                        case ConflictBehavior.DuplicatesFolder:
-                            Directory.CreateDirectory(options.DuplicatesFolderPath);
-                            string dupBase = Path.Combine(options.DuplicatesFolderPath, fileName);
-                            string dupDest = FindRenameDestination(dupBase);
-                            wasRenamed = dupDest != dupBase;
-                            destPath = dupDest;
-                            break;
-                    }
-                }
-
-                if (!skipFile)
-                {
-                    bool overwrite = options.ConflictBehavior == ConflictBehavior.Overwrite;
-                    File.Copy(entry.FilePath, destPath, overwrite);
-                    if (options.Operation == SortOperation.Move)
-                    {
-                        File.Delete(entry.FilePath);
-                        moved++;
+                        Directory.CreateDirectory(options.NoExifFolderPath);
+                        destPath = Path.Combine(options.NoExifFolderPath, fileName);
                     }
                     else
                     {
-                        copied++;
+                        string sub = BuildSubfolderPath(options.FolderPattern, entry.Date, entry.CameraModel);
+                        string destDir = Path.Combine(options.DestinationFolder, sub);
+                        Directory.CreateDirectory(destDir);
+                        destPath = Path.Combine(destDir, fileName);
                     }
-                    if (wasRenamed) renamed++;
+
+                    if (File.Exists(destPath))
+                    {
+                        switch (options.ConflictBehavior)
+                        {
+                            case ConflictBehavior.DoNotCopyOrMove:
+                                skipFile = true;
+                                skipped++;
+                                break;
+                            case ConflictBehavior.RenameCopy:
+                                destPath = FindRenameDestination(destPath);
+                                wasRenamed = true;
+                                break;
+                            case ConflictBehavior.Overwrite:
+                                break;
+                            case ConflictBehavior.DuplicatesFolder:
+                                Directory.CreateDirectory(options.DuplicatesFolderPath);
+                                string dupBase = Path.Combine(options.DuplicatesFolderPath, fileName);
+                                string dupDest = FindRenameDestination(dupBase);
+                                wasRenamed = dupDest != dupBase;
+                                destPath = dupDest;
+                                break;
+                        }
+                    }
+
+                    if (!skipFile)
+                    {
+                        bool overwrite = options.ConflictBehavior == ConflictBehavior.Overwrite;
+                        File.Copy(entry.FilePath, destPath, overwrite);
+                        if (options.Operation == SortOperation.Move)
+                        {
+                            File.Delete(entry.FilePath);
+                            moved++;
+                        }
+                        else
+                        {
+                            copied++;
+                        }
+                        if (wasRenamed) renamed++;
+                    }
+                }
+                catch (OperationCanceledException) { throw; }
+                catch { if (!skipFile) failed++; }
+                finally
+                {
+                    processed++;
+                    progress?.Report(new SortProgress(processed, total, fileName));
                 }
             }
-            catch (OperationCanceledException) { throw; }
-            catch { if (!skipFile) failed++; }
-            finally
-            {
-                processed++;
-                progress?.Report(new SortProgress(processed, total, fileName));
-            }
-        }
+        }, cancellationToken);
 
         return new SortSummary(moved, copied, skipped, renamed, failed);
     }
