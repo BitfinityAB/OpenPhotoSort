@@ -107,5 +107,92 @@ public static class PhotoSorter
         return result;
     }
 
-    // SortAsync added in Task 4
+    public static async Task<SortSummary> SortAsync(
+        SortOptions options,
+        ScanResult scanResult,
+        IProgress<SortProgress> progress,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var workList = await Task.Run(
+            () => BuildWorkList(scanResult, options, cancellationToken), cancellationToken);
+
+        int total = workList.Count;
+        int processed = 0, moved = 0, copied = 0, skipped = 0, renamed = 0, failed = 0;
+
+        foreach (var entry in workList)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            string fileName = Path.GetFileName(entry.FilePath);
+            bool skipFile = false;
+            bool wasRenamed = false;
+
+            try
+            {
+                string destPath;
+                if (entry.IsDump)
+                {
+                    Directory.CreateDirectory(options.NoExifFolderPath);
+                    destPath = Path.Combine(options.NoExifFolderPath, fileName);
+                }
+                else
+                {
+                    string sub = BuildSubfolderPath(options.FolderPattern, entry.Date, entry.CameraModel);
+                    string destDir = Path.Combine(options.DestinationFolder, sub);
+                    Directory.CreateDirectory(destDir);
+                    destPath = Path.Combine(destDir, fileName);
+                }
+
+                if (File.Exists(destPath))
+                {
+                    switch (options.ConflictBehavior)
+                    {
+                        case ConflictBehavior.DoNotCopyOrMove:
+                            skipFile = true;
+                            skipped++;
+                            break;
+                        case ConflictBehavior.RenameCopy:
+                            destPath = FindRenameDestination(destPath);
+                            wasRenamed = true;
+                            break;
+                        case ConflictBehavior.Overwrite:
+                            break;
+                        case ConflictBehavior.DuplicatesFolder:
+                            Directory.CreateDirectory(options.DuplicatesFolderPath);
+                            string dupBase = Path.Combine(options.DuplicatesFolderPath, fileName);
+                            string dupDest = FindRenameDestination(dupBase);
+                            wasRenamed = dupDest != dupBase;
+                            destPath = dupDest;
+                            break;
+                    }
+                }
+
+                if (!skipFile)
+                {
+                    bool overwrite = options.ConflictBehavior == ConflictBehavior.Overwrite;
+                    File.Copy(entry.FilePath, destPath, overwrite);
+                    if (options.Operation == SortOperation.Move)
+                    {
+                        File.Delete(entry.FilePath);
+                        moved++;
+                    }
+                    else
+                    {
+                        copied++;
+                    }
+                    if (wasRenamed) renamed++;
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch { if (!skipFile) failed++; }
+            finally
+            {
+                processed++;
+                progress?.Report(new SortProgress(processed, total, fileName));
+            }
+        }
+
+        return new SortSummary(moved, copied, skipped, renamed, failed);
+    }
 }
