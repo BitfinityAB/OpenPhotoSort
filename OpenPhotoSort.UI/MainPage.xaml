@@ -1,28 +1,174 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="OpenPhotoSort.MainPage">
+             xmlns:vm="clr-namespace:OpenPhotoSort.ViewModels"
+             x:Class="OpenPhotoSort.MainPage"
+             Title="OpenPhotoSort">
 
-    <Grid Padding="10"
-          ColumnDefinitions="*"
-          RowDefinitions="*,9*"
-          RowSpacing="5">
-        <Button
-            x:Name="FilePickerBtn"
-            Text="Select Folder"
-            Clicked="OnFilePickerClicked"
-            HorizontalOptions="Fill"
-            IsEnabled="{Binding BtnIsEnabled}"/>
-        <ScrollView 
-            Grid.Row="1"
-            HorizontalOptions="Fill"
-            MaximumHeightRequest="350">
-            <Editor
-                x:Name="FileProps"
-                Placeholder="File properties are shown here..."
-                AutoSize="TextChanges"
-                IsEnabled="False" />
-        </ScrollView>
-    </Grid>
+    <ScrollView>
+        <Grid ColumnDefinitions="*,1,*" Padding="16,12" ColumnSpacing="0">
 
+            <!-- Vertical separator -->
+            <BoxView Grid.Column="1"
+                     BackgroundColor="{AppThemeBinding Light=#CCCCCC, Dark=#444444}"
+                     Margin="12,0" VerticalOptions="Fill"/>
+
+            <!-- ═══════════════════════════════════════════ LEFT COLUMN ═══ -->
+            <VerticalStackLayout Grid.Column="0" Spacing="0">
+
+                <!-- Step 1 -->
+                <Label Text="Step 1: Choose Folder with Photos to Process:"
+                       FontAttributes="Bold" TextColor="Gray" Margin="0,0,0,6"/>
+                <Border StrokeThickness="1" Padding="6,4" Margin="0,0,0,6">
+                    <Entry Text="{Binding SourceFolder}" IsReadOnly="True"
+                           Placeholder="(no source folder selected)"/>
+                </Border>
+                <HorizontalStackLayout Spacing="16" Margin="0,0,0,8">
+                    <Button Text="Click Here to Choose Folder to Search"
+                            Command="{Binding BrowseSourceCommand}"/>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <CheckBox IsChecked="{Binding IncludeSubfolders}"/>
+                        <Label Text="Include Sub Folders" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
+
+                <!-- Step 2 -->
+                <Label Text="Step 2: Set Destination Folder Under Which Date Sorted Folders Will Be Made:"
+                       FontAttributes="Bold" TextColor="Gray" Margin="0,8,0,6"/>
+                <Border StrokeThickness="1" Padding="6,4" Margin="0,0,0,6">
+                    <Entry Text="{Binding DestinationFolder}" IsReadOnly="True"
+                           Placeholder="(no destination folder selected)"/>
+                </Border>
+                <Button Text="Click Here to Choose Output Folder"
+                        Command="{Binding BrowseDestinationCommand}" Margin="0,0,0,8"
+                        HorizontalOptions="Start"/>
+
+                <!-- Step 3 -->
+                <Label Text="Step 3: Click Find Photos to Find Files to Move or Copy:"
+                       FontAttributes="Bold" TextColor="Gray" Margin="0,8,0,8"/>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Button Grid.Column="0" Text="Find Photos"
+                            Command="{Binding FindPhotosCommand}"
+                            VerticalOptions="Center" Padding="12,8"/>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <!-- Stat row: Total -->
+                        <Grid ColumnDefinitions="56,*">
+                            <Border Grid.Column="0" StrokeThickness="1" Padding="4,2">
+                                <Label Text="{Binding TotalFiles}"
+                                       HorizontalTextAlignment="Center" FontSize="13"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="Total Files Checked In All Folders"
+                                   VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
+                        </Grid>
+                        <!-- Stat row: Valid date -->
+                        <Grid ColumnDefinitions="56,*">
+                            <Border Grid.Column="0" StrokeThickness="1" Padding="4,2">
+                                <Label Text="{Binding FilesWithValidDate}"
+                                       HorizontalTextAlignment="Center" FontSize="13"/>
+                            </Border>
+                            <Label Grid.Column="1"
+                                   Text="Have Valid Date Created in File's Internal Exif Data"
+                                   VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
+                        </Grid>
+                        <!-- Stat row: EXIF no date -->
+                        <Grid ColumnDefinitions="56,*">
+                            <Border Grid.Column="0" StrokeThickness="1" Padding="4,2">
+                                <Label Text="{Binding FilesWithExifButNoDate}"
+                                       HorizontalTextAlignment="Center" FontSize="13"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="Have Exif Data But No Valid Creation Date"
+                                   VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
+                        </Grid>
+                        <!-- Stat row: No EXIF -->
+                        <Grid ColumnDefinitions="56,*">
+                            <Border Grid.Column="0" StrokeThickness="1" Padding="4,2">
+                                <Label Text="{Binding FilesNoExif}"
+                                       HorizontalTextAlignment="Center" FontSize="13"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="No Exif Data"
+                                   VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Progress (visible during sort) -->
+                <ProgressBar Progress="{Binding OperationProgress}"
+                             IsVisible="{Binding IsSorting}" Margin="0,12,0,4"/>
+                <Label Text="{Binding StatusText}" IsVisible="{Binding IsBusy}"
+                       FontSize="12" TextColor="Gray" Margin="0,0,0,4"/>
+
+                <!-- Step 4 -->
+                <Label Text="Step 4: Copy or Move Photos to Date Sorted Folders"
+                       FontAttributes="Bold" TextColor="Gray" Margin="0,16,0,8"/>
+                <HorizontalStackLayout Spacing="12">
+                    <Button Text="COPY to Destination Folders"
+                            Command="{Binding CopyCommand}"
+                            IsEnabled="{Binding CanOperate}"/>
+                    <Button Text="MOVE to Destination Folders"
+                            Command="{Binding MoveCommand}"
+                            IsEnabled="{Binding CanOperate}"/>
+                    <Button Text="Cancel" Command="{Binding CancelCommand}"
+                            IsVisible="{Binding IsSorting}"
+                            BackgroundColor="#CC3333" TextColor="White"/>
+                </HorizontalStackLayout>
+
+                <!-- Bottom bar -->
+                <BoxView HeightRequest="1"
+                         BackgroundColor="{AppThemeBinding Light=#CCCCCC, Dark=#444444}"
+                         Margin="0,16,0,12"/>
+                <Button Text="Show Summary Report"
+                        Command="{Binding ShowSummaryCommand}"
+                        IsEnabled="{Binding ShowSummaryButton}"
+                        HorizontalOptions="Start"/>
+            </VerticalStackLayout>
+
+            <!-- ══════════════════════════════════════════ RIGHT COLUMN ═══ -->
+            <VerticalStackLayout Grid.Column="2" Spacing="8" Padding="16,0,0,0">
+
+                <!-- Folder structure -->
+                <Label Text="Output Folder Structure:" FontAttributes="Bold"/>
+                <Picker ItemsSource="{x:Static vm:MainViewModel.FolderPatternOptions}"
+                        SelectedIndex="{Binding SelectedFolderPatternIndex}"/>
+
+                <!-- Conflict behavior -->
+                <Label Text="If File to be Moved/Copied exists in the destination folder:"
+                       FontAttributes="Bold" Margin="0,12,0,0"/>
+                <Picker ItemsSource="{x:Static vm:MainViewModel.ConflictBehaviorOptions}"
+                        SelectedIndex="{Binding SelectedConflictBehaviorIndex}"/>
+                <HorizontalStackLayout Spacing="4">
+                    <Entry Text="{Binding DuplicatesFolderPath}" IsReadOnly="True"
+                           IsEnabled="{Binding DuplicatesFolderEnabled}"
+                           Placeholder="Duplicates folder…"
+                           HorizontalOptions="FillAndExpand"/>
+                    <Button Text="&gt;" WidthRequest="44"
+                            Command="{Binding BrowseDuplicatesFolderCommand}"
+                            IsEnabled="{Binding DuplicatesFolderEnabled}"/>
+                </HorizontalStackLayout>
+
+                <!-- No-EXIF options -->
+                <Label Text="Option for Files with No Exif Date Created:"
+                       FontAttributes="Bold" Margin="0,12,0,0"/>
+                <HorizontalStackLayout Spacing="8">
+                    <CheckBox IsChecked="{Binding UseFileDateForNoExif}"/>
+                    <Label Text="Use File Date to Move or Copy to Structured Folders"
+                           VerticalOptions="Center" FontSize="13"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <CheckBox IsChecked="{Binding DumpNoExifToFolder}"/>
+                    <Label Text="Copy or Move to This Folder:" VerticalOptions="Center" FontSize="13"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="4">
+                    <Entry Text="{Binding NoExifFolderPath}" IsReadOnly="True"
+                           IsEnabled="{Binding NoExifFolderEnabled}"
+                           Placeholder="No-EXIF folder…"
+                           HorizontalOptions="FillAndExpand"/>
+                    <Button Text="&gt;" WidthRequest="44"
+                            Command="{Binding BrowseNoExifFolderCommand}"
+                            IsEnabled="{Binding NoExifFolderEnabled}"/>
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+
+        </Grid>
+    </ScrollView>
 </ContentPage>

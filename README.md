@@ -31,4 +31,12 @@ OpenPhotoSort.UI/     — MAUI app: folder picker UI, Windows + macOS targets
 
 ## Status
 
-Early stage. EXIF reading is functional; photo sorting/copying is not yet implemented.
+Photo scanning and sorting are implemented. Core features:
+- Scans a folder (optionally recursive) for JPG/JPEG/PNG/BMP/GIF/HEIC files
+- Reads EXIF to detect date and camera model
+- Copies or moves files into configurable date-based folder structures (10 patterns)
+- Handles file conflicts: skip / rename / overwrite / route to duplicates folder
+- Routes no-EXIF files to a dump folder or uses file date as fallback
+- Two-phase UX: scan first to see stats, then copy or move with live progress
+- Cancel button stops an in-progress operation
+- All settings persist across sessions
