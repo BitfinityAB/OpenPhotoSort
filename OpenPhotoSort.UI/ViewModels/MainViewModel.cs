@@ -32,71 +32,84 @@ public partial class MainViewModel : ObservableObject
         "Move to Duplicates Folder"
     };
 
-    // --- Observable properties ---
+    // --- Observable properties (partial property syntax — AOT compatible) ---
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DuplicatesFolderEnabled))]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
-    private string _sourceFolder = string.Empty;
+    public partial string SourceFolder { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
-    private string _destinationFolder = string.Empty;
+    public partial string DestinationFolder { get; set; } = string.Empty;
 
-    [ObservableProperty] private bool _includeSubfolders;
+    [ObservableProperty]
+    public partial bool IncludeSubfolders { get; set; }
+
+    [ObservableProperty]
+    public partial int SelectedFolderPatternIndex { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DuplicatesFolderEnabled))]
-    private int _selectedFolderPatternIndex;
+    public partial int SelectedConflictBehaviorIndex { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DuplicatesFolderEnabled))]
-    private int _selectedConflictBehaviorIndex;
+    public partial string DuplicatesFolderPath { get; set; } = string.Empty;
 
-    [ObservableProperty] private string _duplicatesFolderPath = string.Empty;
-    [ObservableProperty] private bool _useFileDateForNoExif;
+    [ObservableProperty]
+    public partial bool UseFileDateForNoExif { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NoExifFolderEnabled))]
-    private bool _dumpNoExifToFolder;
+    public partial bool DumpNoExifToFolder { get; set; }
 
-    [ObservableProperty] private string _noExifFolderPath = string.Empty;
+    [ObservableProperty]
+    public partial string NoExifFolderPath { get; set; } = string.Empty;
 
-    [ObservableProperty] private int _totalFiles;
-    [ObservableProperty] private int _filesWithValidDate;
-    [ObservableProperty] private int _filesWithExifButNoDate;
-    [ObservableProperty] private int _filesNoExif;
+    [ObservableProperty]
+    public partial int TotalFiles { get; set; }
+
+    [ObservableProperty]
+    public partial int FilesWithValidDate { get; set; }
+
+    [ObservableProperty]
+    public partial int FilesWithExifButNoDate { get; set; }
+
+    [ObservableProperty]
+    public partial int FilesNoExif { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
     [NotifyCanExecuteChangedFor(nameof(CopyCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveCommand))]
     [NotifyPropertyChangedFor(nameof(CanOperate))]
-    private bool _isScanComplete;
+    public partial bool IsScanComplete { get; set; }
 
-    // BUG FIX: Added [NotifyPropertyChangedFor(nameof(IsBusy))] so XAML IsVisible="{Binding IsBusy}" updates
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
     [NotifyCanExecuteChangedFor(nameof(CopyCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveCommand))]
     [NotifyPropertyChangedFor(nameof(CanOperate))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
-    private bool _isScanning;
+    public partial bool IsScanning { get; set; }
 
-    // BUG FIX: Added [NotifyPropertyChangedFor(nameof(IsBusy))] so XAML IsVisible="{Binding IsBusy}" updates
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
     [NotifyCanExecuteChangedFor(nameof(CopyCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveCommand))]
     [NotifyPropertyChangedFor(nameof(CanOperate))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
-    private bool _isSorting;
+    public partial bool IsSorting { get; set; }
 
-    [ObservableProperty] private double _operationProgress;
+    [ObservableProperty]
+    public partial double OperationProgress { get; set; }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStatusVisible))]
-    private string _statusText = string.Empty;
-    [ObservableProperty] private bool _showSummaryButton;
+    public partial string StatusText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool ShowSummaryButton { get; set; }
 
     // --- Computed properties ---
 
@@ -117,15 +130,15 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        _sourceFolder           = Preferences.Get("ops_sourceFolder", string.Empty);
-        _destinationFolder      = Preferences.Get("ops_destFolder", string.Empty);
-        _includeSubfolders      = Preferences.Get("ops_includeSubfolders", false);
-        _selectedFolderPatternIndex   = Preferences.Get("ops_folderPattern", 0);
-        _selectedConflictBehaviorIndex = Preferences.Get("ops_conflictBehavior", 0);
-        _duplicatesFolderPath   = Preferences.Get("ops_duplicatesFolderPath", string.Empty);
-        _useFileDateForNoExif   = Preferences.Get("ops_useFileDateForNoExif", false);
-        _dumpNoExifToFolder     = Preferences.Get("ops_dumpNoExifToFolder", false);
-        _noExifFolderPath       = Preferences.Get("ops_noExifFolderPath", string.Empty);
+        SourceFolder             = Preferences.Get("ops_sourceFolder", string.Empty);
+        DestinationFolder        = Preferences.Get("ops_destFolder", string.Empty);
+        IncludeSubfolders        = Preferences.Get("ops_includeSubfolders", false);
+        SelectedFolderPatternIndex    = Preferences.Get("ops_folderPattern", 0);
+        SelectedConflictBehaviorIndex = Preferences.Get("ops_conflictBehavior", 0);
+        DuplicatesFolderPath     = Preferences.Get("ops_duplicatesFolderPath", string.Empty);
+        UseFileDateForNoExif     = Preferences.Get("ops_useFileDateForNoExif", false);
+        DumpNoExifToFolder       = Preferences.Get("ops_dumpNoExifToFolder", false);
+        NoExifFolderPath         = Preferences.Get("ops_noExifFolderPath", string.Empty);
     }
 
     // --- Preferences save via On{Prop}Changed ---
@@ -232,7 +245,6 @@ public partial class MainViewModel : ObservableObject
                      $"Skipped: {s.Skipped}\n" +
                      $"Renamed: {s.Renamed}\n" +
                      $"Failed:  {s.Failed}";
-        // BUG FIX: Use Shell.Current instead of Application.Current.MainPage (null with CreateWindow)
         await Shell.Current.DisplayAlertAsync("Summary", msg, "OK");
     }
 

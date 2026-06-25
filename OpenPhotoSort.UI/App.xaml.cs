@@ -8,8 +8,8 @@ namespace OpenPhotoSort
 {
     public partial class App : Application
     {
-        const int WindowWidth = 600;
-        const int WindowHeight = 500;
+        const int WindowWidth = 1050;
+        const int WindowHeight = 750;
 
         public App()
         {
