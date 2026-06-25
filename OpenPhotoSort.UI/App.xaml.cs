@@ -36,6 +36,12 @@ namespace OpenPhotoSort
                 appWindow.Resize(new SizeInt32(
                     (int)(WindowWidth * scale),
                     (int)(WindowHeight * scale)));
+
+                // Use the multisize ICO so Windows picks the right frame for
+                // the taskbar (32/48px) instead of scaling down from 256px.
+                string icoPath = Path.Combine(AppContext.BaseDirectory, "openphotosort.ico");
+                if (File.Exists(icoPath))
+                    appWindow.SetIcon(icoPath);
 #endif
             });
         }

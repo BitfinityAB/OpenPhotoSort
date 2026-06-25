@@ -38,6 +38,12 @@
 		<Compile Remove="Helpers\MacCatalyst\FolderPickerXBase.cs" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
+		<Content Include="Resources\AppIcon\openphotosort.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
