@@ -251,10 +251,8 @@ public partial class MainViewModel : ObservableObject
             UseFileDateForNoExif, DumpNoExifToFolder, NoExifFolderPath,
             IncludeSubfolders, operation);
 
-        int lastTotal = 0;
         var progress = new Progress<SortProgress>(p =>
         {
-            lastTotal = p.Total;
             OperationProgress = p.Total > 0 ? (double)p.Processed / p.Total : 0;
             StatusText = $"{p.Processed} / {p.Total}  {p.CurrentFile}";
         });
@@ -282,7 +280,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         if (cancelled)
-            StatusText = $"Cancelled.";
+            StatusText = "Cancelled.";
         else if (_lastSummary is not null)
             StatusText = $"Done. {_lastSummary.Copied + _lastSummary.Moved} file(s) processed.";
     }
