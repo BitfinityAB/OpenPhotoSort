@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:OpenPhotoSort.ViewModels"
              x:Class="OpenPhotoSort.MainPage"
-             Title="OpenPhotoSort">
+             Title="OpenPhotoSort"
+             Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <Grid ColumnDefinitions="*,1,*" Padding="16,12" ColumnSpacing="0">
