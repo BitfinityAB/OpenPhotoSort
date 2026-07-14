@@ -18,7 +18,7 @@
             <VerticalStackLayout Grid.Column="0" Spacing="0">
 
                 <!-- Step 1 -->
-                <Label Text="Step 1: Choose Folder with Photos to Process:"
+                <Label Text="Step 1: Choose Folder with Photos &amp; Videos to Process:"
                        FontAttributes="Bold" TextColor="Gray" Margin="0,0,0,6"/>
                 <Border StrokeThickness="1" Padding="6,4" Margin="0,0,0,6">
                     <Entry Text="{Binding SourceFolder}" IsReadOnly="True"
@@ -45,10 +45,10 @@
                         HorizontalOptions="Start"/>
 
                 <!-- Step 3 -->
-                <Label Text="Step 3: Click Find Photos to Find Files to Move or Copy:"
+                <Label Text="Step 3: Click Find Photos &amp; Videos to Find Files to Move or Copy:"
                        FontAttributes="Bold" TextColor="Gray" Margin="0,8,0,8"/>
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                    <Button Grid.Column="0" Text="Find Photos"
+                    <Button Grid.Column="0" Text="Find Photos &amp; Videos"
                             Command="{Binding FindPhotosCommand}"
                             VerticalOptions="Center" Padding="12,8"/>
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
@@ -68,7 +68,7 @@
                                        HorizontalTextAlignment="Center" FontSize="13"/>
                             </Border>
                             <Label Grid.Column="1"
-                                   Text="Have Valid Date Created in File's Internal Exif Data"
+                                   Text="Have Valid Date in File Metadata"
                                    VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
                         </Grid>
                         <!-- Stat row: EXIF no date -->
@@ -77,7 +77,7 @@
                                 <Label Text="{Binding FilesWithExifButNoDate}"
                                        HorizontalTextAlignment="Center" FontSize="13"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Have Exif Data But No Valid Creation Date"
+                            <Label Grid.Column="1" Text="Have Metadata But No Valid Creation Date"
                                    VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
                         </Grid>
                         <!-- Stat row: No EXIF -->
@@ -86,7 +86,7 @@
                                 <Label Text="{Binding FilesNoExif}"
                                        HorizontalTextAlignment="Center" FontSize="13"/>
                             </Border>
-                            <Label Grid.Column="1" Text="No Exif Data"
+                            <Label Grid.Column="1" Text="No Metadata"
                                    VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
                         </Grid>
                     </VerticalStackLayout>
@@ -99,7 +99,7 @@
                        FontSize="12" TextColor="Gray" Margin="0,0,0,4"/>
 
                 <!-- Step 4 -->
-                <Label Text="Step 4: Copy or Move Photos to Date Sorted Folders"
+                <Label Text="Step 4: Copy or Move Photos &amp; Videos to Date Sorted Folders"
                        FontAttributes="Bold" TextColor="Gray" Margin="0,16,0,8"/>
                 <HorizontalStackLayout Spacing="12">
                     <Button Text="COPY to Destination Folders"
