@@ -54,7 +54,7 @@ public static class PhotoSorter
         return string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c));
     }
 
-    private static string GetCameraModel(Dictionary<string, Tuple<string, string>> exif)
+    internal static string GetCameraModel(Dictionary<string, Tuple<string, string>> exif)
     {
         if (exif.TryGetValue("Model", out var val) && !string.IsNullOrWhiteSpace(val.Item2))
             return val.Item2.Trim();
