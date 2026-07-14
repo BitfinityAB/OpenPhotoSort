@@ -111,7 +111,7 @@ public class PhotoScannerTests : IDisposable
 
         var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
 
-        Assert.Equal(1, result.NoExif.Count);
+        Assert.Single(result.NoExif);
     }
 
     [Fact]
