@@ -10,7 +10,7 @@ public partial class MainViewModel : ObservableObject
 {
     // --- Static picker data ---
 
-    public static IReadOnlyList<string> FolderPatternOptions { get; } = new[]
+    public static string[] FolderPatternOptions { get; } = new[]
     {
         "Yr, Mo, Day",
         "Yr, Mo, Day, Camera Model",
@@ -24,7 +24,7 @@ public partial class MainViewModel : ObservableObject
         "Camera Model, Yr"
     };
 
-    public static IReadOnlyList<string> ConflictBehaviorOptions { get; } = new[]
+    public static string[] ConflictBehaviorOptions { get; } = new[]
     {
         "Do Not Move or Copy",
         "Add '-Copy###', then Move or Copy",

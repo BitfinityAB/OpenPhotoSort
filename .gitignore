@@ -61,3 +61,7 @@ nunit-*.xml
 
 # SDD workspace
 .superpowers/
+
+# MSIX packaging output
+AppPackages/
+BundleArtifacts/
