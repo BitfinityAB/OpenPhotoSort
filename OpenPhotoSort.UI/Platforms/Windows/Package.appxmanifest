@@ -6,13 +6,13 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="0.0.0.0" />
+  <Identity Name="OpenPhotoSort" Publisher="CN=Aziz Khakulov" Version="0.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="AD39C525-46DA-48EC-947F-FBCBDCF0AC0D" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>$placeholder$</DisplayName>
-    <PublisherDisplayName>User Name</PublisherDisplayName>
+    <PublisherDisplayName>Aziz Khakulov</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
 
