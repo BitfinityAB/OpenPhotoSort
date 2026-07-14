@@ -1,5 +1,6 @@
 using ImageMagick;
 using OpenPhotoSort.Core;
+using OpenPhotoSort.Tests.TestHelpers;
 
 namespace OpenPhotoSort.Tests;
 
@@ -123,5 +124,44 @@ public class PhotoScannerTests : IDisposable
 
         await Assert.ThrowsAsync<OperationCanceledException>(() =>
             PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false, cts.Token));
+    }
+
+    [Fact]
+    public async Task ScanAsync_VideoFileWithEmbeddedDate_InWithValidExifDate()
+    {
+        VideoTestHelper.WriteMinimalMp4(
+            Path.Combine(_tempDir, "clip.mp4"),
+            new DateTime(2023, 5, 17, 9, 15, 0, DateTimeKind.Utc));
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Single(result.WithValidExifDate);
+        Assert.Empty(result.WithExifButNoDate);
+        Assert.Empty(result.NoExif);
+        Assert.EndsWith("clip.mp4", result.WithValidExifDate[0]);
+    }
+
+    [Fact]
+    public async Task ScanAsync_CorruptVideoFile_TreatedAsNoExif()
+    {
+        VideoTestHelper.WriteCorruptVideo(Path.Combine(_tempDir, "corrupt.mp4"));
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Single(result.NoExif);
+    }
+
+    [Fact]
+    public async Task ScanAsync_MixedPhotosAndVideos_BucketsBothCorrectly()
+    {
+        WriteJpeg("dated.jpg", exifDate: "2024:06:25 10:30:00");
+        VideoTestHelper.WriteMinimalMp4(
+            Path.Combine(_tempDir, "clip.mp4"),
+            new DateTime(2023, 5, 17, 9, 15, 0, DateTimeKind.Utc));
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Equal(2, result.TotalFiles);
+        Assert.Equal(2, result.WithValidExifDate.Count);
     }
 }

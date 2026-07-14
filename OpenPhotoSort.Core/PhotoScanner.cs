@@ -4,10 +4,9 @@ namespace OpenPhotoSort.Core;
 
 public static class PhotoScanner
 {
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".heic"
-    };
+    private static readonly HashSet<string> SupportedExtensions = new(
+        new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".heic" }.Concat(MediaMetadataHelper.VideoExtensions),
+        StringComparer.OrdinalIgnoreCase);
 
     public static Task<ScanResult> ScanAsync(
         string sourceFolder,
@@ -31,6 +30,22 @@ public static class PhotoScanner
         foreach (string filePath in files)
         {
             ct.ThrowIfCancellationRequested();
+
+            if (MediaMetadataHelper.IsVideoFile(filePath))
+            {
+                try
+                {
+                    if (VideoHelper.TryGetVideoDate(filePath, out _))
+                        withDate.Add(filePath);
+                    else
+                        withExifNoDate.Add(filePath);
+                }
+                catch
+                {
+                    noExif.Add(filePath);
+                }
+                continue;
+            }
 
             Dictionary<string, Tuple<string, string>>? exif = null;
             try { exif = ImageHelper.ReadExifData(filePath); }
