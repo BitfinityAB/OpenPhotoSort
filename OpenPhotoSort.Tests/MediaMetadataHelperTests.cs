@@ -110,4 +110,36 @@ public class MediaMetadataHelperTests : IDisposable
 
         Assert.Equal("UnknownCamera", model);
     }
+
+    [Fact]
+    public void TryGetDateAndCameraModel_VideoFileWithDate_ReturnsDateAndUnknownCameraInOneCall()
+    {
+        string path = Path.Combine(_tempDir, "clip.mp4");
+        var expected = new DateTime(2023, 5, 17, 9, 15, 0, DateTimeKind.Utc);
+        VideoTestHelper.WriteMinimalMp4(path, expected);
+
+        bool found = MediaMetadataHelper.TryGetDateAndCameraModel(path, out var date, out var camera);
+
+        Assert.True(found);
+        Assert.Equal(expected, date, TimeSpan.FromSeconds(1));
+        Assert.Equal("UnknownCamera", camera);
+    }
+
+    [Fact]
+    public void TryGetDateAndCameraModel_ImageFileWithExifDateAndModel_ReturnsBothInOneCall()
+    {
+        string path = Path.Combine(_tempDir, "photo.jpg");
+        var image = new MagickImage(MagickColors.Red, 1, 1);
+        var profile = new ExifProfile();
+        profile.SetValue(ExifTag.DateTimeOriginal, "2024:06:25 10:30:00");
+        profile.SetValue(ExifTag.Model, "TestCam");
+        image.SetProfile(profile);
+        image.Write(path, MagickFormat.Jpeg);
+
+        bool found = MediaMetadataHelper.TryGetDateAndCameraModel(path, out var date, out var camera);
+
+        Assert.True(found);
+        Assert.Equal(new DateTime(2024, 6, 25, 10, 30, 0), date);
+        Assert.Equal("TestCam", camera);
+    }
 }

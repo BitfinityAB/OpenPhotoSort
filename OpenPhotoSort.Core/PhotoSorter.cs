@@ -71,8 +71,8 @@ public static class PhotoSorter
         foreach (string filePath in scanResult.WithValidExifDate)
         {
             ct.ThrowIfCancellationRequested();
-            var date = MediaMetadataHelper.TryGetDate(filePath, out var d) ? d : File.GetLastWriteTime(filePath);
-            string camera = MediaMetadataHelper.GetCameraModel(filePath);
+            bool found = MediaMetadataHelper.TryGetDateAndCameraModel(filePath, out var d, out var camera);
+            var date = found ? d : File.GetLastWriteTime(filePath);
             result.Add(new WorkEntry(filePath, date, camera, false));
         }
 

@@ -43,4 +43,30 @@ internal static class MediaMetadataHelper
         }
         catch { return "UnknownCamera"; }
     }
+
+    internal static bool TryGetDateAndCameraModel(string filePath, out DateTime date, out string cameraModel)
+    {
+        date = default;
+        cameraModel = "UnknownCamera";
+
+        if (IsVideoFile(filePath))
+        {
+            try
+            {
+                bool found = VideoHelper.TryGetDateAndDeviceModel(filePath, out date, out var model);
+                if (!string.IsNullOrEmpty(model)) cameraModel = model;
+                return found;
+            }
+            catch { return false; }
+        }
+
+        try
+        {
+            var exif = ImageHelper.ReadExifData(filePath);
+            if (exif == null) return false;
+            cameraModel = PhotoSorter.GetCameraModel(exif);
+            return PhotoScanner.TryGetExifDate(exif, out date);
+        }
+        catch { return false; }
+    }
 }

@@ -58,4 +58,20 @@ public class VideoHelperTests : IDisposable
 
         Assert.False(found);
     }
+
+    [Fact]
+    public void TryGetDateAndDeviceModel_ValidMp4WithCreationDate_ReturnsDateAndEmptyModel()
+    {
+        // Combined read-once method: date should come back correctly; model is empty since
+        // the synthetic fixture has no device metadata (same fixture as the NoDeviceMetadata test above).
+        string path = Path.Combine(_tempDir, "clip.mp4");
+        var expected = new DateTime(2023, 5, 17, 9, 15, 0, DateTimeKind.Utc);
+        VideoTestHelper.WriteMinimalMp4(path, expected);
+
+        bool found = VideoHelper.TryGetDateAndDeviceModel(path, out var date, out var model);
+
+        Assert.True(found);
+        Assert.Equal(expected, date, TimeSpan.FromSeconds(1));
+        Assert.Equal(string.Empty, model);
+    }
 }
