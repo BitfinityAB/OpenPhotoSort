@@ -1,5 +1,6 @@
 using ImageMagick;
 using OpenPhotoSort.Core;
+using OpenPhotoSort.Tests.TestHelpers;
 
 namespace OpenPhotoSort.Tests;
 
@@ -291,5 +292,45 @@ public class PhotoSorterTests : IDisposable
         Assert.Equal(1, reports[0].Processed);
         Assert.Equal(2, reports[1].Processed);
         Assert.Equal(2, reports[1].Total);
+    }
+
+    [Fact]
+    public async Task SortAsync_CopyDatedVideo_CreatesInDateFolder()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        VideoTestHelper.WriteMinimalMp4(
+            Path.Combine(src, "clip.mp4"),
+            new DateTime(2023, 5, 17, 9, 15, 0, DateTimeKind.Utc));
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = DefaultOptions(src, dest);
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        string expected = Path.Combine(dest, "2023", "2023_05", "2023_05_17", "clip.mp4");
+        Assert.True(File.Exists(expected));
+        Assert.Equal(1, summary.Copied);
+        Assert.Equal(0, summary.Failed);
+    }
+
+    [Fact]
+    public async Task SortAsync_VideoWithNoDateUseFileDate_SortsIntoDateFolder()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        string filePath = Path.Combine(src, "novideo.wmv");
+        File.WriteAllBytes(filePath, new byte[] { 0x30, 0x26, 0xB2, 0x75 }); // not a recognized container
+        File.SetLastWriteTime(filePath, new DateTime(2023, 3, 15));
+
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = new SortOptions(src, dest, FolderPattern.YearMonthDay,
+            ConflictBehavior.DoNotCopyOrMove, "", false, false, "", false, SortOperation.Copy)
+            with { UseFileDateForNoExif = true };
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        string expected = Path.Combine(dest, "2023", "2023_03", "2023_03_15", "novideo.wmv");
+        Assert.True(File.Exists(expected));
+        Assert.Equal(1, summary.Copied);
     }
 }

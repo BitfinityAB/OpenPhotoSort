@@ -71,11 +71,8 @@ public static class PhotoSorter
         foreach (string filePath in scanResult.WithValidExifDate)
         {
             ct.ThrowIfCancellationRequested();
-            Dictionary<string, Tuple<string, string>>? exif = null;
-            try { exif = ImageHelper.ReadExifData(filePath); } catch { }
-            var date = (exif != null && PhotoScanner.TryGetExifDate(exif, out var d))
-                ? d : File.GetLastWriteTime(filePath);
-            string camera = exif != null ? GetCameraModel(exif) : "UnknownCamera";
+            var date = MediaMetadataHelper.TryGetDate(filePath, out var d) ? d : File.GetLastWriteTime(filePath);
+            string camera = MediaMetadataHelper.GetCameraModel(filePath);
             result.Add(new WorkEntry(filePath, date, camera, false));
         }
 
@@ -85,16 +82,9 @@ public static class PhotoSorter
             if (options.UseFileDateForNoExif)
             {
                 var date = File.GetLastWriteTime(filePath);
-                string camera = "UnknownCamera";
-                if (undatedWithExif.Contains(filePath))
-                {
-                    try
-                    {
-                        var exif = ImageHelper.ReadExifData(filePath);
-                        if (exif != null) camera = GetCameraModel(exif);
-                    }
-                    catch { }
-                }
+                string camera = undatedWithExif.Contains(filePath)
+                    ? MediaMetadataHelper.GetCameraModel(filePath)
+                    : "UnknownCamera";
                 result.Add(new WorkEntry(filePath, date, camera, false));
             }
             else if (options.DumpNoExifToFolder)
