@@ -91,6 +91,9 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(MoveCommand))]
     [NotifyPropertyChangedFor(nameof(CanOperate))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    [NotifyPropertyChangedFor(nameof(DuplicatesFolderEnabled))]
+    [NotifyPropertyChangedFor(nameof(NoExifFolderEnabled))]
     public partial bool IsScanning { get; set; }
 
     [ObservableProperty]
@@ -99,6 +102,9 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(MoveCommand))]
     [NotifyPropertyChangedFor(nameof(CanOperate))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    [NotifyPropertyChangedFor(nameof(DuplicatesFolderEnabled))]
+    [NotifyPropertyChangedFor(nameof(NoExifFolderEnabled))]
     public partial bool IsSorting { get; set; }
 
     [ObservableProperty]
@@ -114,11 +120,12 @@ public partial class MainViewModel : ObservableObject
     // --- Computed properties ---
 
     public bool IsBusy => IsScanning || IsSorting;
+    public bool IsNotBusy => !IsBusy;
     public bool CanOperate => IsScanComplete && !IsBusy;
     public bool IsStatusVisible => !string.IsNullOrEmpty(StatusText);
     public bool DuplicatesFolderEnabled =>
-        SelectedConflictBehaviorIndex == (int)ConflictBehavior.DuplicatesFolder;
-    public bool NoExifFolderEnabled => DumpNoExifToFolder;
+        SelectedConflictBehaviorIndex == (int)ConflictBehavior.DuplicatesFolder && !IsBusy;
+    public bool NoExifFolderEnabled => DumpNoExifToFolder && !IsBusy;
 
     // --- State ---
 

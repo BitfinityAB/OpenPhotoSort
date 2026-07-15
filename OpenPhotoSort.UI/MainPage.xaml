@@ -22,13 +22,16 @@
                        FontAttributes="Bold" TextColor="Gray" Margin="0,0,0,6"/>
                 <Border StrokeThickness="1" Padding="6,4" Margin="0,0,0,6">
                     <Entry Text="{Binding SourceFolder}" IsReadOnly="True"
+                           IsEnabled="{Binding IsNotBusy}"
                            Placeholder="(no source folder selected)"/>
                 </Border>
                 <HorizontalStackLayout Spacing="16" Margin="0,0,0,8">
                     <Button Text="Click Here to Choose Folder to Search"
-                            Command="{Binding BrowseSourceCommand}"/>
+                            Command="{Binding BrowseSourceCommand}"
+                            IsEnabled="{Binding IsNotBusy}"/>
                     <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                        <CheckBox IsChecked="{Binding IncludeSubfolders}"/>
+                        <CheckBox IsChecked="{Binding IncludeSubfolders}"
+                                  IsEnabled="{Binding IsNotBusy}"/>
                         <Label Text="Include Sub Folders" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
                 </HorizontalStackLayout>
@@ -38,11 +41,13 @@
                        FontAttributes="Bold" TextColor="Gray" Margin="0,8,0,6"/>
                 <Border StrokeThickness="1" Padding="6,4" Margin="0,0,0,6">
                     <Entry Text="{Binding DestinationFolder}" IsReadOnly="True"
+                           IsEnabled="{Binding IsNotBusy}"
                            Placeholder="(no destination folder selected)"/>
                 </Border>
                 <Button Text="Click Here to Choose Output Folder"
                         Command="{Binding BrowseDestinationCommand}" Margin="0,0,0,8"
-                        HorizontalOptions="Start"/>
+                        HorizontalOptions="Start"
+                        IsEnabled="{Binding IsNotBusy}"/>
 
                 <!-- Step 3 -->
                 <Label Text="Step 3: Click Find Photos &amp; Videos to Find Files to Move or Copy:"
@@ -129,13 +134,15 @@
                 <!-- Folder structure -->
                 <Label Text="Output Folder Structure:" FontAttributes="Bold"/>
                 <Picker ItemsSource="{x:Static vm:MainViewModel.FolderPatternOptions}"
-                        SelectedIndex="{Binding SelectedFolderPatternIndex}"/>
+                        SelectedIndex="{Binding SelectedFolderPatternIndex}"
+                        IsEnabled="{Binding IsNotBusy}"/>
 
                 <!-- Conflict behavior -->
                 <Label Text="If File to be Moved/Copied exists in the destination folder:"
                        FontAttributes="Bold" Margin="0,12,0,0"/>
                 <Picker ItemsSource="{x:Static vm:MainViewModel.ConflictBehaviorOptions}"
-                        SelectedIndex="{Binding SelectedConflictBehaviorIndex}"/>
+                        SelectedIndex="{Binding SelectedConflictBehaviorIndex}"
+                        IsEnabled="{Binding IsNotBusy}"/>
                 <HorizontalStackLayout Spacing="4">
                     <Entry Text="{Binding DuplicatesFolderPath}" IsReadOnly="True"
                            IsEnabled="{Binding DuplicatesFolderEnabled}"
@@ -150,12 +157,14 @@
                 <Label Text="Option for Files with No Exif Date Created:"
                        FontAttributes="Bold" Margin="0,12,0,0"/>
                 <HorizontalStackLayout Spacing="8">
-                    <CheckBox IsChecked="{Binding UseFileDateForNoExif}"/>
+                    <CheckBox IsChecked="{Binding UseFileDateForNoExif}"
+                              IsEnabled="{Binding IsNotBusy}"/>
                     <Label Text="Use File Date to Move or Copy to Structured Folders"
                            VerticalOptions="Center" FontSize="13"/>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="8">
-                    <CheckBox IsChecked="{Binding DumpNoExifToFolder}"/>
+                    <CheckBox IsChecked="{Binding DumpNoExifToFolder}"
+                              IsEnabled="{Binding IsNotBusy}"/>
                     <Label Text="Copy or Move to This Folder:" VerticalOptions="Center" FontSize="13"/>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="4">
