@@ -79,9 +79,14 @@ public static class PhotoSorter
         foreach (string filePath in scanResult.WithExifButNoDate.Concat(scanResult.NoExif))
         {
             ct.ThrowIfCancellationRequested();
-            if (options.UseFileDateForNoExif)
+
+            DateTime filenameDate = default;
+            bool hasFilenameDate = options.TryFilenameDate &&
+                scanResult.FilenameDates.TryGetValue(filePath, out filenameDate);
+
+            if (hasFilenameDate || options.UseFileDateForNoExif)
             {
-                var date = File.GetLastWriteTime(filePath);
+                var date = hasFilenameDate ? filenameDate : File.GetLastWriteTime(filePath);
                 string camera = undatedWithExif.Contains(filePath)
                     ? MediaMetadataHelper.GetCameraModel(filePath)
                     : "UnknownCamera";

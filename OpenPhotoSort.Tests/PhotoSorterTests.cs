@@ -259,6 +259,91 @@ public class PhotoSorterTests : IDisposable
     }
 
     [Fact]
+    public async Task SortAsync_FilenameDateEnabled_TakesPrecedenceOverFileDate()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        var image = new MagickImage(MagickColors.Blue, 1, 1);
+        string filePath = Path.Combine(src, "2023-03-15 09.00.00.jpg");
+        image.Write(filePath, MagickFormat.Jpeg);
+        File.SetLastWriteTime(filePath, new DateTime(2020, 1, 1)); // deliberately different
+
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = new SortOptions(src, dest, FolderPattern.YearMonthDay,
+            ConflictBehavior.DoNotCopyOrMove, "", true, false, "", false, SortOperation.Copy,
+            TryFilenameDate: true);
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        string expected = Path.Combine(dest, "2023", "2023_03", "2023_03_15", "2023-03-15 09.00.00.jpg");
+        Assert.True(File.Exists(expected));
+        Assert.Equal(1, summary.Copied);
+    }
+
+    [Fact]
+    public async Task SortAsync_FilenameDateDisabled_FallsBackToFileDate()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        var image = new MagickImage(MagickColors.Blue, 1, 1);
+        string filePath = Path.Combine(src, "2023-03-15 09.00.00.jpg");
+        image.Write(filePath, MagickFormat.Jpeg);
+        File.SetLastWriteTime(filePath, new DateTime(2020, 1, 1));
+
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = new SortOptions(src, dest, FolderPattern.YearMonthDay,
+            ConflictBehavior.DoNotCopyOrMove, "", true, false, "", false, SortOperation.Copy,
+            TryFilenameDate: false);
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        string expected = Path.Combine(dest, "2020", "2020_01", "2020_01_01", "2023-03-15 09.00.00.jpg");
+        Assert.True(File.Exists(expected));
+        Assert.Equal(1, summary.Copied);
+    }
+
+    [Fact]
+    public async Task SortAsync_FilenameDateEnabledButUnparseable_FallsBackToFileDate()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        var image = new MagickImage(MagickColors.Blue, 1, 1);
+        string filePath = Path.Combine(src, "noexif.jpg");
+        image.Write(filePath, MagickFormat.Jpeg);
+        File.SetLastWriteTime(filePath, new DateTime(2020, 1, 1));
+
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = new SortOptions(src, dest, FolderPattern.YearMonthDay,
+            ConflictBehavior.DoNotCopyOrMove, "", true, false, "", false, SortOperation.Copy,
+            TryFilenameDate: true);
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        string expected = Path.Combine(dest, "2020", "2020_01", "2020_01_01", "noexif.jpg");
+        Assert.True(File.Exists(expected));
+        Assert.Equal(1, summary.Copied);
+    }
+
+    [Fact]
+    public async Task SortAsync_FilenameDateEnabledNeitherFallbackSet_OmitsFile()
+    {
+        string src = MakeTempDir("src");
+        string dest = MakeTempDir("dest");
+        var image = new MagickImage(MagickColors.Blue, 1, 1);
+        image.Write(Path.Combine(src, "noexif.jpg"), MagickFormat.Jpeg);
+
+        var scanResult = await PhotoScanner.ScanAsync(src, false);
+        var options = new SortOptions(src, dest, FolderPattern.YearMonthDay,
+            ConflictBehavior.DoNotCopyOrMove, "", false, false, "", false, SortOperation.Copy,
+            TryFilenameDate: true);
+
+        var summary = await PhotoSorter.SortAsync(options, scanResult, null!);
+
+        Assert.Equal(0, summary.Copied);
+        Assert.Equal(0, summary.Failed);
+    }
+
+    [Fact]
     public async Task SortAsync_Cancelled_ThrowsOperationCanceled()
     {
         string src = MakeTempDir("src");

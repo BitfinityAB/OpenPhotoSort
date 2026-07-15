@@ -34,4 +34,5 @@ public record SortOptions(
     bool DumpNoExifToFolder,
     string NoExifFolderPath,
     bool IncludeSubfolders,
-    SortOperation Operation);
+    SortOperation Operation,
+    bool TryFilenameDate = false);
