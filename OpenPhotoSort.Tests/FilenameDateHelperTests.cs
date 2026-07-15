@@ -37,6 +37,21 @@ public class FilenameDateHelperTests
         Assert.False(found);
     }
 
+    [Theory]
+    [InlineData("img_20240625_101500.jpg", 2024, 6, 25, 10, 15, 0)]
+    [InlineData("vid_20240625_101500.mp4", 2024, 6, 25, 10, 15, 0)]
+    [InlineData("pxl_20240625_101500123.jpg", 2024, 6, 25, 10, 15, 0)]
+    [InlineData("screenshot_20240625-101500.png", 2024, 6, 25, 10, 15, 0)]
+    [InlineData("whatsapp image 2024-06-25 at 10.15.00.jpeg", 2024, 6, 25, 10, 15, 0)]
+    public void TryParseDate_LowercasePrefix_ReturnsExpectedDate(
+        string fileName, int y, int mo, int d, int h, int mi, int s)
+    {
+        bool found = FilenameDateHelper.TryParseDate(fileName, out var date);
+
+        Assert.True(found);
+        Assert.Equal(new DateTime(y, mo, d, h, mi, s), date);
+    }
+
     [Fact]
     public void TryParseDate_FullPathWithDirectory_UsesFilenameOnly()
     {

@@ -80,6 +80,7 @@ public static class PhotoSorter
         {
             ct.ThrowIfCancellationRequested();
 
+            // Pre-initialized only to satisfy definite assignment; only read when hasFilenameDate is true.
             DateTime filenameDate = default;
             bool hasFilenameDate = options.TryFilenameDate &&
                 scanResult.FilenameDates.TryGetValue(filePath, out filenameDate);
