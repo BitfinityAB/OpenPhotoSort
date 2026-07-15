@@ -9,22 +9,22 @@ internal static class FilenameDateHelper
     private static readonly Regex[] Patterns =
     {
         // IMG_20240625_101500.jpg / VID_20240625_101500.mp4
-        new(@"^(?:IMG|VID)_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})$",
+        new(@"^(?:IMG|VID)_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})(?:-\d+)?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase),
         // PXL_20240625_101500123.jpg / .mp4 (Pixel, trailing milliseconds)
-        new(@"^PXL_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})\d{3}$",
+        new(@"^PXL_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})\d{3}(?:-\d+)?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase),
         // 20240625_101500.jpg (bare)
-        new(@"^(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})$",
+        new(@"^(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})_(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})(?:-\d+)?$",
             RegexOptions.Compiled),
         // Screenshot_20240625-101500.png
-        new(@"^Screenshot_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})-(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})$",
+        new(@"^Screenshot_(?<y>\d{4})(?<mo>\d{2})(?<d>\d{2})-(?<h>\d{2})(?<mi>\d{2})(?<s>\d{2})(?:-\d+)?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase),
         // 2024-06-25 10.15.00.jpg
-        new(@"^(?<y>\d{4})-(?<mo>\d{2})-(?<d>\d{2}) (?<h>\d{2})\.(?<mi>\d{2})\.(?<s>\d{2})$",
+        new(@"^(?<y>\d{4})-(?<mo>\d{2})-(?<d>\d{2}) (?<h>\d{2})\.(?<mi>\d{2})\.(?<s>\d{2})(?:-\d+)?$",
             RegexOptions.Compiled),
         // WhatsApp Image 2024-06-25 at 10.15.00.jpeg / WhatsApp Video ... .mp4
-        new(@"^WhatsApp (?:Image|Video) (?<y>\d{4})-(?<mo>\d{2})-(?<d>\d{2}) at (?<h>\d{2})\.(?<mi>\d{2})\.(?<s>\d{2})$",
+        new(@"^WhatsApp (?:Image|Video) (?<y>\d{4})-(?<mo>\d{2})-(?<d>\d{2}) at (?<h>\d{2})\.(?<mi>\d{2})\.(?<s>\d{2})(?:-\d+)?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase),
     };
 
