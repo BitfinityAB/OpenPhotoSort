@@ -164,4 +164,50 @@ public class PhotoScannerTests : IDisposable
         Assert.Equal(2, result.TotalFiles);
         Assert.Equal(2, result.WithValidExifDate.Count);
     }
+
+    [Fact]
+    public async Task ScanAsync_NoExifFileWithParseableFilename_RecordedInFilenameDates()
+    {
+        WriteJpeg("2024-06-25 10.15.00.jpg"); // no EXIF profile at all
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Single(result.NoExif);
+        Assert.True(result.FilenameDates.TryGetValue(result.NoExif[0], out var date));
+        Assert.Equal(new DateTime(2024, 6, 25, 10, 15, 0), date);
+    }
+
+    [Fact]
+    public async Task ScanAsync_ExifButNoDateFileWithParseableFilename_RecordedInFilenameDates()
+    {
+        WriteJpeg("IMG_20240625_101500.jpg", cameraModel: "TestCam"); // has EXIF, no date tag
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Single(result.WithExifButNoDate);
+        Assert.True(result.FilenameDates.TryGetValue(result.WithExifButNoDate[0], out var date));
+        Assert.Equal(new DateTime(2024, 6, 25, 10, 15, 0), date);
+    }
+
+    [Fact]
+    public async Task ScanAsync_VideoFilenameEncodesDate_RecordedInFilenameDates()
+    {
+        VideoTestHelper.WriteCorruptVideo(Path.Combine(_tempDir, "VID_20240625_101500.mp4"));
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Single(result.NoExif);
+        Assert.True(result.FilenameDates.TryGetValue(result.NoExif[0], out var date));
+        Assert.Equal(new DateTime(2024, 6, 25, 10, 15, 0), date);
+    }
+
+    [Fact]
+    public async Task ScanAsync_FilenameDoesNotEncodeDate_NotRecordedInFilenameDates()
+    {
+        WriteJpeg("noexif.jpg");
+
+        var result = await PhotoScanner.ScanAsync(_tempDir, includeSubfolders: false);
+
+        Assert.Empty(result.FilenameDates);
+    }
 }

@@ -22,6 +22,7 @@ public static class PhotoScanner
         var withDate = new List<string>();
         var withExifNoDate = new List<string>();
         var noExif = new List<string>();
+        var filenameDates = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
         var searchOption = includeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
         var files = Directory.EnumerateFiles(sourceFolder, "*", searchOption)
@@ -36,13 +37,19 @@ public static class PhotoScanner
                 try
                 {
                     if (VideoHelper.TryGetVideoDate(filePath, out _))
+                    {
                         withDate.Add(filePath);
+                    }
                     else
+                    {
                         withExifNoDate.Add(filePath);
+                        TryRecordFilenameDate(filePath, filenameDates);
+                    }
                 }
                 catch
                 {
                     noExif.Add(filePath);
+                    TryRecordFilenameDate(filePath, filenameDates);
                 }
                 continue;
             }
@@ -54,6 +61,7 @@ public static class PhotoScanner
             if (exif == null)
             {
                 noExif.Add(filePath);
+                TryRecordFilenameDate(filePath, filenameDates);
             }
             else if (TryGetExifDate(exif, out _))
             {
@@ -62,10 +70,17 @@ public static class PhotoScanner
             else
             {
                 withExifNoDate.Add(filePath);
+                TryRecordFilenameDate(filePath, filenameDates);
             }
         }
 
-        return new ScanResult(withDate, withExifNoDate, noExif);
+        return new ScanResult(withDate, withExifNoDate, noExif, filenameDates);
+    }
+
+    private static void TryRecordFilenameDate(string filePath, Dictionary<string, DateTime> filenameDates)
+    {
+        if (FilenameDateHelper.TryParseDate(filePath, out var date))
+            filenameDates[filePath] = date;
     }
 
     internal static bool TryGetExifDate(Dictionary<string, Tuple<string, string>> exif, out DateTime date)
