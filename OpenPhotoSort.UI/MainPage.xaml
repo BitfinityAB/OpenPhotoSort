@@ -94,6 +94,15 @@
                             <Label Grid.Column="1" Text="No Metadata"
                                    VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
                         </Grid>
+                        <!-- Stat row: Filename date recoverable -->
+                        <Grid ColumnDefinitions="56,*">
+                            <Border Grid.Column="0" StrokeThickness="1" Padding="4,2">
+                                <Label Text="{Binding FilesFilenameDateRecoverable}"
+                                       HorizontalTextAlignment="Center" FontSize="13"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="Date Recoverable from Filename"
+                                   VerticalOptions="Center" Margin="8,0,0,0" FontSize="13"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Grid>
 
@@ -156,6 +165,12 @@
                 <!-- No-EXIF options -->
                 <Label Text="Option for Files with No Exif Date Created:"
                        FontAttributes="Bold" Margin="0,12,0,0"/>
+                <HorizontalStackLayout Spacing="8">
+                    <CheckBox IsChecked="{Binding TryFilenameDate}"
+                              IsEnabled="{Binding IsNotBusy}"/>
+                    <Label Text="Try to Parse Date from Filename"
+                           VerticalOptions="Center" FontSize="13"/>
+                </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="8">
                     <CheckBox IsChecked="{Binding UseFileDateForNoExif}"
                               IsEnabled="{Binding IsNotBusy}"/>

@@ -64,6 +64,9 @@ public partial class MainViewModel : ObservableObject
     public partial bool DumpNoExifToFolder { get; set; }
 
     [ObservableProperty]
+    public partial bool TryFilenameDate { get; set; }
+
+    [ObservableProperty]
     public partial string NoExifFolderPath { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -77,6 +80,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     public partial int FilesNoExif { get; set; }
+
+    [ObservableProperty]
+    public partial int FilesFilenameDateRecoverable { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindPhotosCommand))]
@@ -146,6 +152,7 @@ public partial class MainViewModel : ObservableObject
         UseFileDateForNoExif     = Preferences.Get("ops_useFileDateForNoExif", false);
         DumpNoExifToFolder       = Preferences.Get("ops_dumpNoExifToFolder", false);
         NoExifFolderPath         = Preferences.Get("ops_noExifFolderPath", string.Empty);
+        TryFilenameDate          = Preferences.Get("ops_tryFilenameDate", false);
     }
 
     // --- Preferences save via On{Prop}Changed ---
@@ -168,6 +175,8 @@ public partial class MainViewModel : ObservableObject
         Preferences.Set("ops_dumpNoExifToFolder", value);
     partial void OnNoExifFolderPathChanged(string value) =>
         Preferences.Set("ops_noExifFolderPath", value);
+    partial void OnTryFilenameDateChanged(bool value) =>
+        Preferences.Set("ops_tryFilenameDate", value);
 
     // --- Commands ---
 
@@ -206,7 +215,7 @@ public partial class MainViewModel : ObservableObject
         IsScanComplete = false;
         ShowSummaryButton = false;
         StatusText = "Scanning…";
-        TotalFiles = FilesWithValidDate = FilesWithExifButNoDate = FilesNoExif = 0;
+        TotalFiles = FilesWithValidDate = FilesWithExifButNoDate = FilesNoExif = FilesFilenameDateRecoverable = 0;
 
         try
         {
@@ -215,6 +224,7 @@ public partial class MainViewModel : ObservableObject
             FilesWithValidDate = _lastScan.WithValidExifDate.Count;
             FilesWithExifButNoDate = _lastScan.WithExifButNoDate.Count;
             FilesNoExif = _lastScan.NoExif.Count;
+            FilesFilenameDateRecoverable = _lastScan.FilenameDates.Count;
             IsScanComplete = true;
             StatusText = $"Found {TotalFiles} file(s).";
         }
@@ -272,7 +282,7 @@ public partial class MainViewModel : ObservableObject
             (ConflictBehavior)SelectedConflictBehaviorIndex,
             DuplicatesFolderPath,
             UseFileDateForNoExif, DumpNoExifToFolder, NoExifFolderPath,
-            IncludeSubfolders, operation);
+            IncludeSubfolders, operation, TryFilenameDate);
 
         var progress = new Progress<SortProgress>(p =>
         {
